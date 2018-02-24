@@ -78,12 +78,6 @@ function woocommerce_ipaymu_init() {
                                 'description' => __( 'Belum memiliki kode API? <a target="_blank" href="https://ipaymu.com/dokumentasi-api-ipaymu-perkenalan">Pelajari cara Mendapatkan API Key</a></small>.', 'woothemes' ), 
                                 'default' => ''
                             ),
-                /*'debugrecip' => array(
-                                'title' => __( 'Debugging Email', 'woothemes' ), 
-                                'type' => 'text', 
-                                'description' => __( 'Who should receive the debugging emails.', 'woothemes' ), 
-                                'default' =>  get_option('admin_email')
-                            ),*/
             );
         }
 
@@ -194,7 +188,7 @@ function woocommerce_ipaymu_init() {
         global $woocommerce;
         if(isset($_POST['trx_id']) && isset($_POST['status']))
         {
-			$order = new WC_Order($_REQUEST['id_order']);
+			$order = new WC_Order($_REQUEST['order_id']);
 			update_post_meta( $order->id, '_ipaymu', $_POST['trx_id']);
 
             if($_POST['status'] == 'berhasil') {
@@ -212,19 +206,17 @@ function woocommerce_ipaymu_init() {
 }
 
 // Adding Cronjob
-register_activation_hook( __FILE__, 'plugin_install' );
-
-function plugin_install() {
-    /*Register WP CRON*/
-    if ( ! wp_next_scheduled( 'ipaymu_woocommerce_cronjob' ) ) {
-      wp_schedule_event( time(), 'hourly', 'ipaymu_woocommerce_cronjob' );
-    }
-
-    add_action( 'ipaymu_woocommerce_cronjob', 'ipaymu_woocommerce_cronjob' );
+if ( ! wp_next_scheduled( 'wc_ipy_cronjob' ) ) {
+    wp_schedule_event( time(), 'hourly', 'wc_ipy_cronjob' );
 }
 
-function ipaymu_woocommerce_cronjob() {
+add_action( 'wc_ipy_cronjob', 'ipycronjob');
+
+function ipycronjob() {
 	global $woocommerce;
+
+	$apiKey 	=	get_option('woocommerce_ipaymu_settings');
+	
 	$orders = wc_get_orders( 
 		[
 			'payment_method' => 'ipaymu',
@@ -235,11 +227,10 @@ function ipaymu_woocommerce_cronjob() {
 
 	foreach($orders as $order)
 	{
-		
 		$ipaymu 	=	get_post_meta( $order->id, '_ipaymu', true );
-		$content 	=	json_decode(file_get_contents("https://my.ipaymu.com/api/CekTransaksi.php?format=json&key=".$this->settings['apikey']."&id=".$ipaymu), true);
+		$content 	=	json_decode(file_get_contents("https://my.ipaymu.com/api/CekTransaksi.php?format=json&key=".$apiKey['apikey']."&id=".$ipaymu), true);
 
-		if($_POST['status'] == 'berhasil') {
+		if($content['Status'] == 1) {
 			$order->add_order_note( __( 'Pembayaran telah dilakukan melalui ipaymu dengan id transaksi '.$content['id'], 'woocommerce' ) );
 			$order->payment_complete();
 		}
@@ -248,7 +239,7 @@ function ipaymu_woocommerce_cronjob() {
 
 // Deactivate Cronjob when plugin deactivated
 function plugin_deactivation() {
-    wp_clear_scheduled_hook("ipaymu_woocommerce_cronjob");
+    wp_clear_scheduled_hook("wc_ipy_cronjob");
 }
 
 register_deactivation_hook( __FILE__, 'plugin_deactivation' );
