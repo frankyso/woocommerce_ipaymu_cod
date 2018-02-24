@@ -1,1 +1,1 @@
-"# woocomerce-ipaymu" 
+# iPaymu Payment Gateway Plugin - WooComerce
