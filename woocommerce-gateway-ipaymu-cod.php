@@ -3,7 +3,7 @@
 /*
   Plugin Name: iPaymu Payment Gateway COD
   Plugin URI: http://ipaymu.com
-  Description: iPaymu Payment Gateway
+  Description: iPaymu Payment Gateway COD
   Version: 1.0
   Author: iPaymu Development Team
   Author URI: http://ipaymu.com
@@ -14,6 +14,25 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 add_action('plugins_loaded', 'woocommerce_ipaymu_cod_init', 0);
 
 function woocommerce_ipaymu_cod_init() {
+    if(strlen(WC_Admin_Settings::get_option('sender_phone'))==0){
+        add_action( 'admin_notices', function(){
+            ?>
+            <div class="notice notice-warning is-dismissible">
+                <p>Anda harus mengatur <strong>Nomor Telepon Pengirim</strong> agar dapat menggunakan iPaymu COD</p>
+            </div>
+            <?php
+        } );
+    }
+
+    if(strlen(WC_Admin_Settings::get_option('sender_district'))==0){
+        add_action( 'admin_notices', function(){
+            ?>
+            <div class="notice notice-warning is-dismissible">
+            <p>Anda harus mengatur <strong>Kelurahan Pengirim</strong> agar dapat menggunakan iPaymu COD</p>
+            </div>
+            <?php
+        } );
+    }
 
     if (!class_exists('WC_Payment_Gateway'))
         return;
@@ -67,6 +86,8 @@ function woocommerce_ipaymu_cod_init() {
 
             // One One Product Per Transaction
             add_filter( 'woocommerce_available_payment_gateways', array( $this, 'only_one_product_per_cart' ) );
+
+            // Checking required data
         }
 
         function only_one_product_per_cart($available_gateways){
@@ -124,7 +145,7 @@ function woocommerce_ipaymu_cod_init() {
                     'default' => '',
                 ),
                 'sender_phone (Required)' => array(
-                    'title' => __( 'Nomor Telepon Pengirim', 'woothemes' ), 
+                    'title' => __( 'Nomor Telepon Pengirim (Required)', 'woothemes' ), 
                     'type' => 'text', 
                     'description' => __( 'Nomor Telepon Pengirim untuk informasi pengambilan barang. Jika dikosongkan website tidak akan dapat memproses transaksi COD.', 'woothemes' ), 
                     'default' => '',                    
@@ -136,7 +157,7 @@ function woocommerce_ipaymu_cod_init() {
                     'default' => '',
                 ),
                 'sender_district' => array(
-                    'title' => __( 'Kelurahan Pengirim', 'woothemes' ), 
+                    'title' => __( 'Kelurahan Pengirim (Required)', 'woothemes' ), 
                     'type' => 'text', 
                     'description' => __( 'Kelurahan Pengirim untuk informasi pengambilan barang. Jika dikosongkan website tidak akan dapat memproses transaksi COD.', 'woothemes' ), 
                     'default' => '',
