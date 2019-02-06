@@ -14,7 +14,9 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 add_action('plugins_loaded', 'woocommerce_ipaymu_cod_init', 0);
 
 function woocommerce_ipaymu_cod_init() {
-    if(strlen(WC_Admin_Settings::get_option('sender_phone'))==0){
+    $ipaymucodSetting = get_option('woocommerce_ipaymucod_settings');
+    
+    if(strlen($ipaymucodSetting['ipaymucod_settings'])==0){
         add_action( 'admin_notices', function(){
             ?>
             <div class="notice notice-warning is-dismissible">
@@ -24,7 +26,7 @@ function woocommerce_ipaymu_cod_init() {
         } );
     }
 
-    if(strlen(WC_Admin_Settings::get_option('sender_district'))==0){
+    if(strlen($ipaymucodSetting['sender_district'])==0){
         add_action( 'admin_notices', function(){
             ?>
             <div class="notice notice-warning is-dismissible">
