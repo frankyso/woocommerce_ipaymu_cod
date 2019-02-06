@@ -144,7 +144,7 @@ function woocommerce_ipaymu_cod_init() {
                     'description' => __( 'Nama Pengirim untuk informasi pengambilan barang. Jika dikosongkan data default website (<strong>'.get_bloginfo().'</strong>) akan digunakan.', 'woothemes' ), 
                     'default' => '',
                 ),
-                'sender_phone (Required)' => array(
+                'sender_phone' => array(
                     'title' => __( 'Nomor Telepon Pengirim (Required)', 'woothemes' ), 
                     'type' => 'text', 
                     'description' => __( 'Nomor Telepon Pengirim untuk informasi pengambilan barang. Jika dikosongkan website tidak akan dapat memproses transaksi COD.', 'woothemes' ), 
