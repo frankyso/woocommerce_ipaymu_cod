@@ -16,7 +16,7 @@ add_action('plugins_loaded', 'woocommerce_ipaymu_cod_init', 0);
 function woocommerce_ipaymu_cod_init() {
     $ipaymucodSetting = get_option('woocommerce_ipaymucod_settings');
     
-    if(strlen($ipaymucodSetting['ipaymucod_settings'])==0){
+    if(strlen($ipaymucodSetting['sender_phone'])==0){
         add_action( 'admin_notices', function(){
             ?>
             <div class="notice notice-warning is-dismissible">
@@ -96,7 +96,21 @@ function woocommerce_ipaymu_cod_init() {
             global $woocommerce;
             if($woocommerce->cart->get_cart_contents_count()>1){
                 unset( $available_gateways['ipaymucod'] );
+            } else {
+                $items =  $woocommerce->cart->get_cart();
+                foreach ($items as $item_key => $item_value){
+                    $width  = $item_value['data']->get_width();
+                    $height = $item_value['data']->get_height();
+                    $length = $item_value['data']->get_length();
+                    $weight = $item_value['data']->get_weight();
+                    
+                    if( $width <= 0 || $height <= 0 || $length <= 0 || $weight <= 0 ) {
+                        unset( $available_gateways['ipaymucod'] );
+                    }
+                }
             }
+
+            // check if product has more
             return $available_gateways;
         }
 
